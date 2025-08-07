@@ -14,8 +14,8 @@ class CoilSettingsFrame(ttk.Frame):
         entry_padding = 5
         main_current_frame = ttk.Frame(self)
         ttk.Label(main_current_frame, text='Main').pack(side='left', padx=entry_padding)
-        ttk.Entry(main_current_frame, textvariable=self.main_current).pack(side='right',
-                                                                            padx=entry_padding)
+        self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current)
+        self.entMainCurrent.pack(side='right', padx=entry_padding)
         main_current_frame.grid(column = 0, row = 0)
         for i in range(17):
             self.coil_settings[i] = ttk.StringVar(value = '0')

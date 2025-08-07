@@ -1,5 +1,6 @@
 import ttkbootstrap as ttk
 
+from .coordinator import Coordinator
 from trimco.gui.coil_settings import CoilSettingsFrame
 from trimco.gui.plot import Plot
 
@@ -15,6 +16,7 @@ class TrimcoApp(ttk.Window):
 
         self.coil_settings.pack(side='top')
         self.plot.pack(side='top')
+        self.coordinator = Coordinator([self.plot, self.coil_settings])
 
     def quit(self):
         self.destroy()
