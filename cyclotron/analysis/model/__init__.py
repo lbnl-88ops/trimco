@@ -1,1 +1,1 @@
-from magnetic_field import MagneticField, FieldMetadata
+from .magnetic_field import MagneticField, FieldMetadata
