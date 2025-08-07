@@ -5,7 +5,7 @@ import ttkbootstrap as ttk
 import numpy as np
 
 
-class Plot(ttk.Frame):
+class PlotFrame(ttk.Frame):
     def __init__(self, owner):
         super().__init__(owner)
         self.create_plot()

@@ -1,7 +1,7 @@
 from typing import Any, List
 from pathlib import Path
 
-from trimco.gui.plot import Plot
+from trimco.gui.plot import PlotFrame
 from trimco.gui.coil_settings import CoilSettingsFrame
 
 from cyclotron.analysis.io import build_iron_field_from_file
@@ -17,7 +17,7 @@ class Coordinator:
     def attach(self, objects: List[Any]) -> None:
         for object in objects:
             match object:
-                case Plot():
+                case PlotFrame():
                     self._plot = object
                 case CoilSettingsFrame():
                     self._coil_settings = object
