@@ -33,8 +33,8 @@ class Coordinator:
     def update_main_current(self) -> bool:
         self._plot.clear_plot()
         try:
-            self.field_profile.set_main_current(
-                float(self._coil_settings.main_current.get()))
+            self.field_profile.update_profile(float(self._coil_settings.main_current.get()),
+                                              {i: 0 for i in range(17)})
         except ValueError:
             return False
         except RuntimeError:
