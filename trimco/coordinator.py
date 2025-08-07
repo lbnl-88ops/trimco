@@ -4,7 +4,7 @@ from pathlib import Path
 from trimco.gui.plot import PlotFrame
 from trimco.gui.coil_settings import CoilSettingsFrame
 
-from cyclotron.analysis.io import build_iron_field_from_file
+from trimco.calc.field_profile import FieldProfile
 
 import numpy as np
 
@@ -12,7 +12,7 @@ class Coordinator:
     def __init__(self, objects: List[Any]):
         self.attach(objects)
         self.configure_objects()
-        self._main_field_path = Path('./data/fieldmap.txt')
+        self.field_profile = FieldProfile()
 
     def attach(self, objects: List[Any]) -> None:
         for object in objects:
@@ -33,13 +33,15 @@ class Coordinator:
     def update_main_current(self) -> bool:
         self._plot.clear_plot()
         try:
-            main_current = float(self._coil_settings.main_current.get())
+            self.field_profile.set_main_current(
+                float(self._coil_settings.main_current.get()))
         except ValueError:
             return False
-        try:
-            iron_field = build_iron_field_from_file(main_current, self._main_field_path)
         except RuntimeError:
             return False
-        self._plot.plot_field(np.array(iron_field.r_values), 
-                              iron_field.first_moment(), 'Iron-field')
+        self.update_plot()
         return True
+
+    def update_plot(self):
+        r, field = self.field_profile.field_profile()
+        self._plot.plot_field(r, field, 'Current field')
