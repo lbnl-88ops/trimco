@@ -16,16 +16,22 @@ class PlotFrame(ttk.Frame):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=True)
 
-    def create_plot(self):
-        self._fig = Figure((9,6), tight_layout=True)
+    def _configure_plot(self) -> None:
         ax = self._fig.gca()
         ax.set_xlabel('Radius (in)')
         ax.set_ylabel('B (kG)')
         ax.set_xlim(0, 60)
+        ax.grid(alpha=0.25, ls='--', c='k')
+        ax.legend()
+
+    def create_plot(self):
+        self._fig = Figure((9,6), tight_layout=True)
+        self._configure_plot()
 
     def plot_field(self, r_values: np.ndarray, field: np.ndarray, label: str) -> None:
         ax = self._fig.gca()
-        ax.plot(r_values, field, label=label, ls='--')
+        ax.plot(r_values, field/1000, label=label, ls='--')
+        self._configure_plot()
         self.canvas.draw()
 
     def clear_plot(self) -> None:
