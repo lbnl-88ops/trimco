@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 
 from trimco.gui.coil_settings import CoilSettingsFrame
+from trimco.gui.plot import Plot
 
 class TrimcoApp(ttk.Window):
     def __init__(self):
@@ -10,8 +11,10 @@ class TrimcoApp(ttk.Window):
 
     def create_widgets(self):
         self.coil_settings = CoilSettingsFrame(self)
+        self.plot = Plot(self)
 
-        self.coil_settings.pack(side='left')
+        self.coil_settings.pack(side='top')
+        self.plot.pack(side='top')
 
     def quit(self):
         self.destroy()
