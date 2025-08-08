@@ -32,9 +32,10 @@ class Coordinator:
         self._main_current = float(self._coil_settings.main_current.get())
         for entry in self._coil_settings.trim_coil_entries.values():
             entry.config(validate='focusout', validatecommand=self.update_currents)
-        self._coil_settings.entMainCurrent.config(
-            validate='focusout', validatecommand=self.update_currents
-        )
+        for checkbox in self._coil_settings_calculated.trim_coil_checkboxes.values():
+            checkbox.config(command=self.update_currents)
+        self._coil_settings.entMainCurrent.config(validate='focusout', 
+                                                  validatecommand=self.update_currents)
 
     def update_currents(self) -> bool:
         self._plot.clear_plot()
@@ -48,7 +49,8 @@ class Coordinator:
             calculated_coil_entries = {i: float(self._coil_settings_calculated.trim_coil_entries[i].get())
                                        for i in range(17)}
             for i in range(17):
-                if not self._coil_settings_calculated.trim_coil_checkboxes[i]:
+                if not self._coil_settings_calculated.use_trim_coil[i].get():
+                    print(f'not using coil {i}')
                     calculated_coil_entries[i] = 0
             self.field_profile.update_profile(main_current, coil_entries)
             self.calculated_field_profile.update_profile(main_current, calculated_coil_entries)
