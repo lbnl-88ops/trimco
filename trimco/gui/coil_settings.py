@@ -29,7 +29,8 @@ class CoilSettingsFrame(ttk.Frame):
                 self.trim_coil_checkboxes[i] = ttk.Checkbutton(coil_frame, variable=self.use_trim_coil[i])
                 self.trim_coil_checkboxes[i].pack(side='left')
             ttk.Label(coil_frame, text=f'Coil {i+1}').pack(side='left', padx=entry_padding)
-            coil_entry = ttk.Entry(coil_frame, textvariable=self.coil_settings[i])
+            coil_entry = ttk.Entry(coil_frame, textvariable=self.coil_settings[i],
+                                   state='normal' if not is_calculated else 'disable')
             coil_entry.pack(side='right', padx=entry_padding)
             self.trim_coil_entries[i] = coil_entry
             coil_frame.grid(column=int(i/4), row=int(i % 4) + 1, padx=frame_padding, sticky='E')
