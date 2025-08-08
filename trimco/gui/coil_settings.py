@@ -3,26 +3,27 @@ from typing import Dict
 import ttkbootstrap as ttk
 
 class CoilSettingsFrame(ttk.Frame):
-    def __init__(self, owner, include_check_boxes = False):
+    def __init__(self, owner, is_calculated = False):
         super().__init__(owner, borderwidth=1, relief=ttk.RAISED)
         self.coil_settings: Dict[int, ttk.StringVar] = {}
         self.main_current = ttk.StringVar(value = '0')
-        self.create_widgets(include_check_boxes)
+        self.create_widgets(is_calculated)
         
-    def create_widgets(self, include_check_boxes):
+    def create_widgets(self, is_calculated):
         frame_padding = 5
         entry_padding = 5
-        main_current_frame = ttk.Frame(self)
-        ttk.Label(main_current_frame, text='Main').pack(side='left', padx=entry_padding)
-        self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current)
-        self.entMainCurrent.pack(side='right', padx=entry_padding)
+        if not is_calculated:
+            main_current_frame = ttk.Frame(self)
+            ttk.Label(main_current_frame, text='Main').pack(side='left', padx=entry_padding)
+            self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current)
+            self.entMainCurrent.pack(side='right', padx=entry_padding)
+            main_current_frame.grid(column = 0, row = 0)
         self.trim_coil_entries = {}
         self.trim_coil_checkboxes = {}
-        main_current_frame.grid(column = 0, row = 0)
         for i in range(17):
             self.coil_settings[i] = ttk.StringVar(value = '0')
             coil_frame = ttk.Frame(self)
-            if include_check_boxes:
+            if is_calculated:
                 self.trim_coil_checkboxes[i] = ttk.BooleanVar(value=False)
                 ttk.Checkbutton(coil_frame, variable=self.trim_coil_checkboxes[i]).pack(side='left')
             ttk.Label(coil_frame, text=f'Coil {i+1}').pack(side='left', padx=entry_padding)
@@ -33,4 +34,4 @@ class CoilSettingsFrame(ttk.Frame):
 
 class CoilSettingsCalculatedFrame(CoilSettingsFrame):
     def __init__(self, owner):
-        super().__init__(owner, include_check_boxes=True)
+        super().__init__(owner, is_calculated=True)
