@@ -20,7 +20,7 @@ class PlotFrame(ttk.Frame):
         ax = self._fig.gca()
         ax.set_xlabel('Radius (in)')
         ax.set_ylabel('B (kG)')
-        ax.set_xlim(0, 60)
+        ax.set_xlim(0, 40)
         ax.grid(alpha=0.25, ls='--', c='k')
         ax.legend()
 
