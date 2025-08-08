@@ -6,7 +6,7 @@ class CoilSettingsFrame(ttk.Frame):
     def __init__(self, owner, is_calculated = False):
         super().__init__(owner, borderwidth=1, relief=ttk.RAISED)
         self.coil_settings: Dict[int, ttk.StringVar] = {}
-        self.main_current = ttk.StringVar(value = '0')
+        self.main_current = ttk.StringVar(value = '1000')
         self.create_widgets(is_calculated)
         
     def create_widgets(self, is_calculated):

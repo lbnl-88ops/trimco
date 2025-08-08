@@ -15,6 +15,8 @@ class PlotFrame(ttk.Frame):
         self.canvas = FigureCanvasTkAgg(self._fig, self)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=True)
+        self.strWarning = ttk.StringVar(self, value='')
+        ttk.Label(self, textvariable=self.strWarning).pack()
 
     def _configure_plot(self) -> None:
         ax = self._fig.gca()
