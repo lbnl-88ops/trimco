@@ -18,7 +18,8 @@ class TrimcoApp(ttk.Window):
         self.coil_settings.pack(side='top')
         self.plot.pack(side='top')
         self.coil_settings_calculated.pack(side='top')
-        self.coordinator = Coordinator([self.plot, self.coil_settings])
+        self.coordinator = Coordinator([self.plot, self.coil_settings,
+                                        self.coil_settings_calculated])
 
     def quit(self):
         self.destroy()
