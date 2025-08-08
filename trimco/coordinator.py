@@ -26,6 +26,8 @@ class Coordinator:
 
     def configure_objects(self):
         self._main_current = float(self._coil_settings.main_current.get())
+        for entry in self._coil_settings.trim_coil_entries.values():
+            entry.config(validate='focusout', validatecommand=self.update_main_current)
         self._coil_settings.entMainCurrent.config(
             validate='focusout', validatecommand=self.update_main_current
         )
@@ -34,7 +36,8 @@ class Coordinator:
         self._plot.clear_plot()
         try:
             self.field_profile.update_profile(float(self._coil_settings.main_current.get()),
-                                              {i: 0 for i in range(17)})
+                                              {i: float(self._coil_settings.trim_coil_entries[i].get())
+                                                for i in range(17)})
         except ValueError:
             return False
         except RuntimeError:

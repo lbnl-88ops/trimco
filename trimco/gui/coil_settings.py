@@ -16,11 +16,13 @@ class CoilSettingsFrame(ttk.Frame):
         ttk.Label(main_current_frame, text='Main').pack(side='left', padx=entry_padding)
         self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current)
         self.entMainCurrent.pack(side='right', padx=entry_padding)
+        self.trim_coil_entries = {}
         main_current_frame.grid(column = 0, row = 0)
         for i in range(17):
             self.coil_settings[i] = ttk.StringVar(value = '0')
             coil_frame = ttk.Frame(self)
             ttk.Label(coil_frame, text=f'Coil {i+1}').pack(side='left', padx=entry_padding)
-            ttk.Entry(coil_frame, textvariable=self.coil_settings[i]).pack(side='right', 
-                                                                            padx=entry_padding)
+            coil_entry = ttk.Entry(coil_frame, textvariable=self.coil_settings[i])
+            coil_entry.pack(side='right', padx=entry_padding)
+            self.trim_coil_entries[i] = coil_entry
             coil_frame.grid(column=int(i/4), row=int(i % 4) + 1, padx=frame_padding, sticky='E')
