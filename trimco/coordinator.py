@@ -33,9 +33,10 @@ class Coordinator:
 
     def configure_objects(self):
         self._main_current = float(self._coil_settings.main_current.get())
-        for entry in self._coil_settings.trim_coil_entries.values():
+        for entry in [s.entry for s in self._coil_settings.coil_settings.values()]:
             entry.config(validate='focusout', validatecommand=self.update_currents)
-        for checkbox in self._coil_settings_calculated.trim_coil_checkboxes.values():
+        for checkbox in [s.checkbox for s in self._coil_settings_calculated.coil_settings.values()
+                         if s.checkbox is not None]:
             checkbox.config(command=self.update_currents)
         self._coil_settings.entMainCurrent.config(validate='focusout', 
                                                   validatecommand=self.update_currents)
@@ -55,7 +56,7 @@ class Coordinator:
         return True
 
     def _use_trim_coils(self) -> List[int]:
-        return [i for i in range(17) if self._coil_settings_calculated.use_trim_coil[i].get()]
+        return self._coil_settings_calculated.use_trim_coils()
 
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
@@ -66,14 +67,14 @@ class Coordinator:
             if solved_currents is not None:
                 self._plot.strWarning.set('')
                 for coil, current in solved_currents.items():
-                    self._coil_settings_calculated.coil_settings[coil.number - 1].set(f'{current:.0f}')
+                    self._coil_settings_calculated.coil_settings[coil.number - 1].setting.set(f'{current:.0f}')
             else:
                 self._plot.strWarning.set('Fit failed, try to add more trim coils.')
 
     def _update_field_profiles(self, main_current):
-        coil_entries = {i: float(self._coil_settings.trim_coil_entries[i].get()) for i in range(17)}
-        calculated_coil_entries = {i: float(self._coil_settings_calculated.coil_settings[i].get())
-                                    for i in range(17)}
+        coil_entries = {i: self._coil_settings.current(i) for i in range(17)}
+        calculated_coil_entries = {i: self._coil_settings_calculated.current(i) for i in range(17)}
+
         for i in [coil for coil in calculated_coil_entries if coil not in self._use_trim_coils()]:
             calculated_coil_entries[i] = 0        
 
