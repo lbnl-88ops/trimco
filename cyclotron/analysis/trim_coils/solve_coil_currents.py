@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from logging import getLogger
 
 import numpy as np
@@ -10,13 +10,22 @@ _log = getLogger(__name__)
 
 def solve_coil_currents(
         field: np.ndarray, 
-        trim_coils: List[TrimCoil]) -> Dict[TrimCoil, float] | None:
+        trim_coils: List[TrimCoil],
+        *,
+        use_coils: Optional[List[int]] = None) -> Dict[TrimCoil, float] | None:
+    if use_coils is None:
+        use_coils = [coil.number for coil in trim_coils]
+    use_coils = sorted(use_coils)
+
     solved_currents: Dict[TrimCoil, float] = {}
     k = len(field)
     bounds = []
 
-    sorted_coils = sorted(trim_coils, key=lambda x: x.number)
-    A = np.zeros((len(trim_coils), k))
+    sorted_coils = [coil for coil in sorted(trim_coils, key=lambda x: x.number)
+                    if coil.number in use_coils]
+
+    A = np.zeros((len(sorted_coils), k))
+
     for i, coil in enumerate(sorted_coils):
         bounds.append(coil.current_limits)
         A[i, :] = coil.db_di()[:k]
@@ -28,12 +37,16 @@ def solve_coil_currents(
                   23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39] + 15*[0])[:k]
         return float(np.sqrt(np.sum(weights * r)))
 
-    result = minimize(residual, np.zeros((len(trim_coils))), bounds=bounds)    
+    result = minimize(residual, np.zeros((len(sorted_coils))), bounds=bounds)    
     if not result['success']:
         _log.warning('Trim coil fit failed')
         return None
     x = result['x']
     for i, current in enumerate(x):
-        solved_currents[sorted_coils[i]] = current
+        coil = sorted_coils[i]
+        if coil.number in use_coils:
+            solved_currents[coil] = current
+        else:
+            solved_currents[coil] = 0
 
     return solved_currents
