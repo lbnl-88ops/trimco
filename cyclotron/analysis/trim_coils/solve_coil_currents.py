@@ -27,7 +27,10 @@ def solve_coil_currents(
     A = np.zeros((len(sorted_coils), k))
 
     for i, coil in enumerate(sorted_coils):
-        bounds.append(coil.current_limits)
+        min_current, max_current = coil.current_limits
+        if min_current is None:
+            min_current = -max_current
+        bounds.append((min_current, max_current))
         A[i, :] = coil.db_di()[:k]
 
     def residual(x) -> float: 
