@@ -22,7 +22,7 @@ class TrimCoil:
     def set_max_current(self, to_set: float) -> None:
         self._max_current = to_set
 
-    def set_current_limits(self, limits: Tuple[float, float]) -> None:
+    def set_current_limits(self, limits: Tuple[float | None, float]) -> None:
         self._min_current, self._max_current = limits
 
     @property

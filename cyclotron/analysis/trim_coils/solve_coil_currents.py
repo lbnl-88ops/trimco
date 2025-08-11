@@ -20,6 +20,7 @@ def solve_coil_currents(
     solved_currents: Dict[TrimCoil, float] = {}
     k = len(field)
     bounds = []
+    constraints = []
 
     sorted_coils = [coil for coil in sorted(trim_coils, key=lambda x: x.number)
                     if coil.number in use_coils]
@@ -30,6 +31,10 @@ def solve_coil_currents(
         min_current, max_current = coil.current_limits
         if min_current is None:
             min_current = -max_current
+        else:
+            constraints.append({'type': 'ineq', 'fun': lambda x, i=i, min_current=min_current: abs(x[i]) - min_current})
+            min_current = -max_current
+
         bounds.append((min_current, max_current))
         A[i, :] = coil.db_di()[:k]
 
@@ -39,8 +44,8 @@ def solve_coil_currents(
                   11,12,13,14,15,16,17,18,19,20,21,22,
                   23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39] + 15*[0])[:k]
         return float(np.sqrt(np.sum(weights * r)))
-
-    result = minimize(residual, np.zeros((len(sorted_coils))), bounds=bounds)    
+    result = minimize(residual, np.zeros((len(sorted_coils))), bounds=bounds, 
+                      constraints=constraints)    
     if not result['success']:
         _log.warning('Trim coil fit failed')
         return None

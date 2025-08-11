@@ -5,7 +5,7 @@ from cyclotron.analysis.model import TrimCoil
 def _get_default_limits(coil_number: int) -> tuple:
     match coil_number:
         case 1:
-            return (None, 750.0)
+            return (300, 750.0)
         case 2 | 3 | 4 | 5 | 6 | 7 | 8 | 10 | 11:
             return (None, 750)
         case 12 | 13 | 14 | 15: 
@@ -21,4 +21,4 @@ def update_current_limits(trim_coils: List[TrimCoil],
         if coil.number in use_trim_coils:
             coil.set_current_limits(_get_default_limits(coil.number))
         else:
-            coil.set_current_limits((0, 0))
+            coil.set_current_limits((None, 0))
