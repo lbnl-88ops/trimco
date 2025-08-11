@@ -6,6 +6,7 @@ from trimco.gui.plot import PlotFrame
 from trimco.gui.coil_settings import CoilSettingsCalculatedFrame, CoilSettingsFrame
 
 from trimco.calc.field_profile import FieldProfile
+from trimco.calc.coil_limits import CoilLimits
 from cyclotron.analysis.trim_coils import solve_coil_currents, update_current_limits
 
 import numpy as np
@@ -15,6 +16,7 @@ class Coordinator:
         self.attach(objects)
         self.field_profile = FieldProfile()
         self.calculated_field_profile = FieldProfile()
+        self._coil_limits = CoilLimits()
         self.configure_objects()
 
     def attach(self, objects: List[Any]) -> None:
@@ -58,14 +60,13 @@ class Coordinator:
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
         if trim_coils is not None:
-            print()
             update_current_limits(trim_coils, [v + 1 for v in self._use_trim_coils()])
             solved_currents = solve_coil_currents(self.field_profile.trim_coil_profile(),
                                                   trim_coils)
             if solved_currents is not None:
                 self._plot.strWarning.set('')
                 for coil, current in solved_currents.items():
-                    self._coil_settings_calculated.coil_settings[coil.number - 1].set(current)
+                    self._coil_settings_calculated.coil_settings[coil.number - 1].set(f'{current:.0f}')
             else:
                 self._plot.strWarning.set('Fit failed, try to add more trim coils.')
 
