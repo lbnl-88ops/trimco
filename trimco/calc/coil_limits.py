@@ -7,7 +7,7 @@ from cyclotron.analysis.trim_coils.current_limits import _get_default_limits
 class CoilLimits:
     def __init__(self):
         self.current_limits: Dict[int, Tuple[float, float]] = {
-            i + 1: _get_default_limits(i + 1) for i in range(17)
+            i: _get_default_limits(i + 1) for i in range(17)
     }
         # for coil in trim_coils:
             # if coil.number in use_trim_coils:

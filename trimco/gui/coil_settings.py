@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pydoc import text
 from typing import Dict, Optional, List
 
 import ttkbootstrap as ttk
@@ -9,6 +10,7 @@ class CoilSettings:
     setting: ttk.StringVar
     use_trim_coil: Optional[ttk.BooleanVar] = None
     checkbox: Optional[ttk.Checkbutton] = None
+    max_current: Optional[ttk.StringVar] = None
 
 class CoilSettingsFrame(ttk.Frame):
     def __init__(self, owner, is_calculated = False):
@@ -53,7 +55,7 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
         super().__init__(owner, is_calculated=True)
 
     def use_trim_coils(self) -> List[int]:
-        return [n for n, c in self.coil_settings.items() if c.use_trim_coil is not None 
+        return [n + 1 for n, c in self.coil_settings.items() if c.use_trim_coil is not None 
                 and c.use_trim_coil.get()]
 
     def create_widgets(self, is_calculated):
@@ -61,8 +63,13 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
         for i, coil_frame in enumerate(self.coil_frames):
             coil_setting = self.coil_settings[i]
             coil_setting.use_trim_coil = ttk.BooleanVar(value=False)
+            coil_setting.max_current = ttk.StringVar()
             coil_setting.checkbox = ttk.Checkbutton(coil_frame, variable=coil_setting.use_trim_coil)
+            # Packing and repacking
+            coil_setting.entry.pack_forget()
             coil_setting.checkbox.pack(side='left')
+            ttk.Entry(coil_frame, textvariable=coil_setting.max_current).pack(side='right')
+            coil_setting.entry.pack(side='right')
 
 
 
