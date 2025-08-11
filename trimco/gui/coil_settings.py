@@ -10,37 +10,40 @@ class CoilSettings:
     setting: ttk.StringVar
     use_trim_coil: Optional[ttk.BooleanVar] = None
     checkbox: Optional[ttk.Checkbutton] = None
+    min_current: Optional[ttk.StringVar] = None
     max_current: Optional[ttk.StringVar] = None
+
 
 class CoilSettingsFrame(ttk.Frame):
     def __init__(self, owner, is_calculated = False):
-        super().__init__(owner, borderwidth=1, relief=ttk.RAISED)
+        super().__init__(owner)
         self.main_current = ttk.StringVar(value = '1000')
         self.coil_settings: Dict[int, CoilSettings] = {}
+        self.frame_padding = 5
+        self.entry_padding = 5
         self.create_widgets(is_calculated)
         
     def create_widgets(self, is_calculated):
-        frame_padding = 5
-        entry_padding = 5
 
         if not is_calculated:
             main_current_frame = ttk.Frame(self)
-            ttk.Label(main_current_frame, text='Main').pack(side='left', padx=entry_padding)
-            self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current)
-            self.entMainCurrent.pack(side='right', padx=entry_padding)
+            ttk.Label(main_current_frame, text='Main').pack(side='left', padx=self.entry_padding)
+            self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current,
+                                            width=5)
+            self.entMainCurrent.pack(side='right', padx=self.entry_padding)
             main_current_frame.grid(column = 0, row = 0)
 
         self.coil_frames = []
         for i in range(17):
             self.coil_frames.append(ttk.Frame(self))
             coil_frame = self.coil_frames[-1]
-            coil_frame.grid(column=int(i/4), row=int(i % 4) + 1, padx=frame_padding, sticky='E')
+            coil_frame.grid(column=int(i/4), row=int(i % 4) + 1, padx=self.frame_padding, sticky='W')
 
             coil_setting = ttk.StringVar(value = '0')
-            ttk.Label(coil_frame, text=f'Coil {i+1}').pack(side='left', padx=entry_padding)
-            coil_entry = ttk.Entry(coil_frame, textvariable=coil_setting,
+            ttk.Label(coil_frame, text=f'Coil {i+1}', width=6).pack(side='left', padx=self.entry_padding)
+            coil_entry = ttk.Entry(coil_frame, textvariable=coil_setting, width=5,
                                    state='normal' if not is_calculated else 'disable')
-            coil_entry.pack(side='right', padx=entry_padding)
+            coil_entry.pack(side='right', padx=self.entry_padding)
             self.coil_settings[i] = CoilSettings(coil_entry, coil_setting)
 
     def current(self, i: int) -> float:
@@ -67,8 +70,13 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
             coil_setting.checkbox = ttk.Checkbutton(coil_frame, variable=coil_setting.use_trim_coil)
             # Packing and repacking
             coil_setting.entry.pack_forget()
-            coil_setting.checkbox.pack(side='left')
-            ttk.Entry(coil_frame, textvariable=coil_setting.max_current).pack(side='right')
+            coil_setting.checkbox.pack(side='left', padx=self.entry_padding)
+            ttk.Entry(coil_frame, textvariable=coil_setting.max_current, width=5).pack(side='right')
+            ttk.Label(coil_frame, text='Max', width=4).pack(side='right', padx=self.entry_padding)
+            if i == 0:
+                coil_setting.min_current = ttk.StringVar()
+                ttk.Entry(coil_frame, textvariable=coil_setting.min_current, width=5).pack(side='right')
+                ttk.Label(coil_frame, text='Min', width=4).pack(side='right', padx=self.entry_padding)
             coil_setting.entry.pack(side='right')
 
 

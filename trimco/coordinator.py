@@ -82,8 +82,12 @@ class Coordinator:
             return
         for trim_coil in trim_coils:
             trim_coil.set_current_limits(self._coil_limits.current_limits[trim_coil.number - 1])
-            self._coil_settings_calculated.coil_settings[trim_coil.number - 1].max_current.set(
-                f'{trim_coil.current_limits[1]:.0f}')
+            coil_settings = self._coil_settings_calculated.coil_settings[trim_coil.number - 1]
+            if coil_settings.max_current is not None:
+                coil_settings.max_current.set(f'{trim_coil.current_limits[1]:.0f}')
+            if coil_settings.min_current is not None:
+                coil_settings.min_current.set(f'{trim_coil.current_limits[0]:.0f}')
+
 
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
