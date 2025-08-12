@@ -25,7 +25,6 @@ def solve_coil_currents(
     comparison_required: bool = False
     positive_bounds = []
     negative_bounds = []
-    constraints = []
 
     sorted_coils = [coil for coil in sorted(trim_coils, key=lambda x: x.number)
                     if coil.number in use_coils]
@@ -56,7 +55,10 @@ def solve_coil_currents(
     # to avoid extra if/then trees and simplify remaining code
     negative_result = positive_result
     if comparison_required: 
-        negative_result = minimize(residual, np.zeros((len(sorted_coils))), bounds=negative_bounds) 
+        x = np.zeros_like((len(sorted_coils)))
+        if positive_result['success']:
+            x = positive_result['x']
+        negative_result = minimize(residual, x, bounds=negative_bounds) 
 
     if not positive_result['success'] and negative_result['success']:
         _log.warning('Trim coil fit failed')
