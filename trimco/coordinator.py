@@ -91,7 +91,7 @@ class Coordinator:
         return True
 
     def _use_trim_coils(self) -> List[int]:
-        return self._coil_settings_calculated.use_trim_coils()
+        return [n for n,v in self._coil_settings_calculated.use_trim_coils().items() if v]
 
     def _update_current_limits(self):
         trim_coils = self.calculated_field_profile.trim_coils
@@ -112,11 +112,12 @@ class Coordinator:
         if trim_coils is not None:
             for setting in self._coil_settings_calculated.coil_settings.values():
                 setting.setting.set('0')
-            use_coils = self._coil_settings_calculated.use_trim_coils()
-            if use_coils:
+            use_coils_indexes = self._use_trim_coils()
+            if use_coils_indexes:
+                # increment coil index by 1 because solve coil currents expects number not index
                 solved_currents = solve_coil_currents(self.field_profile.trim_coil_profile(),
                                                     trim_coils,
-                                                    use_coils=use_coils)
+                                                    use_coils=[v + 1 for v in use_coils_indexes])
                 if solved_currents is not None:
                     self._plot.strWarning.set('')
 

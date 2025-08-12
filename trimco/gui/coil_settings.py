@@ -58,9 +58,9 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
     def __init__(self, owner):
         super().__init__(owner, is_calculated=True)
 
-    def use_trim_coils(self) -> List[int]:
-        return [n + 1 for n, c in self.coil_settings.items() if c.use_trim_coil is not None 
-                and c.use_trim_coil.get()]
+    def use_trim_coils(self) -> Dict[int, float]:
+        return {n: c.use_trim_coil.get() for n, c in self.coil_settings.items() 
+                if c.use_trim_coil is not None}
 
     def create_widgets(self, is_calculated):
         super().create_widgets(is_calculated)
@@ -83,6 +83,4 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
                 coil_setting.current_entries.append(min_current_entry)
                 ttk.Label(coil_frame, text='Min', width=4).pack(side='right', padx=self.entry_padding)
             coil_setting.entry.pack(side='right')
-
-
 
