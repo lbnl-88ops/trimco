@@ -2,6 +2,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import ttkbootstrap as ttk
+import ttkbootstrap.icons as icon
 import numpy as np
 
 
@@ -16,7 +17,8 @@ class PlotFrame(ttk.Frame):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=True)
         self.strWarning = ttk.StringVar(self, value='')
-        ttk.Label(self, textvariable=self.strWarning).pack()
+        self.lblWarning = ttk.Label(self, textvariable=self.strWarning)
+        self.lblWarning.pack(pady=10)
 
     def _configure_plot(self) -> None:
         ax = self._fig.gca()
@@ -25,6 +27,14 @@ class PlotFrame(ttk.Frame):
         ax.set_xlim(0, 40)
         ax.grid(alpha=0.25, ls='--', c='k')
         ax.legend()
+
+    def set_warning(self, text) -> None:
+        self.lblWarning.config(bootstyle='inverse-danger')
+        self.strWarning.set(str(icon.Emoji.get('WARNING SIGN')) + text)
+
+    def clear_warning(self) -> None:
+        self.lblWarning.config(bootstyle='default')
+        self.strWarning.set('')
 
     def create_plot(self):
         self._fig = Figure((9,6), tight_layout=True)

@@ -9,6 +9,7 @@ from trimco.calc.field_profile import FieldProfile
 from cyclotron.analysis.trim_coils import solve_coil_currents
 from cyclotron.analysis.trim_coils.current_limits import _get_default_limits
 
+import ttkbootstrap as ttk
 import numpy as np
 
 class Coordinator:
@@ -105,11 +106,11 @@ class Coordinator:
                                                 trim_coils,
                                                 use_coils=[v + 1 for v in use_coils_indexes])
             if solved_currents is not None:
-                self._plot.strWarning.set('')
+                self._plot.clear_warning()
                 self._coil_settings_calculated.set_current_settings(
                     {(c.number - 1): current for c, current in solved_currents.items()})
             else:
-                self._plot.strWarning.set('Fit failed, try to add more trim coils.')
+                self._plot.set_warning('Fit failed, try changing trim coil settings')
 
     def _update_field(self):
         self._update_field_profile(self.field_profile, self._coil_settings)
