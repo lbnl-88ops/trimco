@@ -1,5 +1,5 @@
-from tkinter import Variable
 import ttkbootstrap as ttk
+from . import __version__
 
 from .coordinator import Coordinator
 from trimco.gui.coil_settings import CoilSettingsFrame, CoilSettingsCalculatedFrame
@@ -7,7 +7,7 @@ from trimco.gui.plot import PlotFrame
 
 class TrimcoApp(ttk.Window):
     def __init__(self):
-        super().__init__(title='Trimco')
+        super().__init__(title=f'TRIMCO v.{__version__}')
         self.protocol("WM_DELETE_WINDOW", self.quit)
         self.create_widgets()
 
