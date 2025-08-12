@@ -23,6 +23,7 @@ class CoilSettingsFrame(ttk.Frame):
         self.coil_settings: Dict[int, CoilSettings] = {}
         self.frame_padding = 5
         self.entry_padding = 5
+        self.entry_width = 6
         self.create_widgets(is_calculated)
         
     def create_widgets(self, is_calculated):
@@ -31,7 +32,7 @@ class CoilSettingsFrame(ttk.Frame):
             main_current_frame = ttk.Frame(self)
             ttk.Label(main_current_frame, text='Main').pack(side='left', padx=self.entry_padding)
             self.entMainCurrent = ttk.Entry(main_current_frame, textvariable=self.main_current,
-                                            width=5)
+                                            width=7)
             self.entMainCurrent.pack(side='right', padx=self.entry_padding)
             main_current_frame.grid(column = 0, row = 0)
 
@@ -43,7 +44,7 @@ class CoilSettingsFrame(ttk.Frame):
 
             coil_setting = ttk.StringVar(value = '0')
             ttk.Label(coil_frame, text=f'Coil {i+1}', width=6).pack(side='left', padx=self.entry_padding)
-            coil_entry = ttk.Entry(coil_frame, textvariable=coil_setting, width=5,
+            coil_entry = ttk.Entry(coil_frame, textvariable=coil_setting, width=self.entry_width,
                                    state='normal' if not is_calculated else 'disable')
             coil_entry.pack(side='right', padx=self.entry_padding)
             self.coil_settings[i] = CoilSettings(coil_entry, coil_setting)
@@ -101,13 +102,13 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
             # Packing and repacking
             coil_setting.entry.pack_forget()
             coil_setting.checkbox.pack(side='left', padx=self.entry_padding)
-            max_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.max_current, width=5)
+            max_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.max_current, width=self.entry_width)
             max_current_entry.pack(side='right')
             ttk.Label(coil_frame, text='Max', width=4).pack(side='right', padx=self.entry_padding)
             coil_setting.current_entries.append(max_current_entry)
             if i == 0:
                 coil_setting.min_current = ttk.StringVar()
-                min_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.min_current, width=5)
+                min_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.min_current, width=self.entry_width)
                 min_current_entry.pack(side='right')
                 coil_setting.current_entries.append(min_current_entry)
                 ttk.Label(coil_frame, text='Min', width=4).pack(side='right', padx=self.entry_padding)
