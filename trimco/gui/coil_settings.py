@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pydoc import text
 from typing import Dict, Optional, List, Tuple
 
+import numpy as np
 import ttkbootstrap as ttk
 
 @dataclass
@@ -68,6 +69,14 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
             setting.max_current.set(f'{max:.0f}')
             if min is not None and setting.min_current is not None:
                 setting.min_current.set(f'{min:.0f}')
+
+    def clear_current_settings(self) -> None:
+        for coil_setting in self.coil_settings.values():
+            coil_setting.setting.set('0')
+
+    def set_current_settings(self, to_set: Dict[int, float]) -> None:
+        for i, current in to_set.items():
+            self.coil_settings[i].setting.set(f'{np.round(current, decimals=0):.0f}')
 
     @property
     def max_currents(self) -> Dict[int, float]:

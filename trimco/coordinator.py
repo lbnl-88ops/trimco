@@ -95,9 +95,9 @@ class Coordinator:
             return
         for trim_coil in trim_coils:
             trim_coil.set_current_limits(self._coil_limits[trim_coil.number - 1]) 
-        for setting in self._coil_settings_calculated.coil_settings.values():
-            setting.setting.set('0')
+
         use_coils_indexes = self._use_trim_coils()
+        self._coil_settings_calculated.clear_current_settings()
 
         if use_coils_indexes:
             # increment coil index by 1 because solve coil currents expects number not index
@@ -106,10 +106,8 @@ class Coordinator:
                                                 use_coils=[v + 1 for v in use_coils_indexes])
             if solved_currents is not None:
                 self._plot.strWarning.set('')
-
-                for trim_coil, current in solved_currents.items():
-                    idx = trim_coil.number - 1
-                    self._coil_settings_calculated.coil_settings[idx].setting.set(f'{current:.0f}')
+                self._coil_settings_calculated.set_current_settings(
+                    {(c.number - 1): current for c, current in solved_currents.items()})
             else:
                 self._plot.strWarning.set('Fit failed, try to add more trim coils.')
 
