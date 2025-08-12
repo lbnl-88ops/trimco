@@ -42,9 +42,9 @@ class Coordinator:
                 entry.config(validate='focusout', validatecommand=self.current_limit_update)
         self._coil_settings.entMainCurrent.config(validate='focusout', 
                                                   validatecommand=self.update_main_current)
+        self._coil_settings_calculated.set_current_limits(self._coil_limits)
         self._update_field() 
         self._update_calculated_field()
-        self._update_current_limits()
         self.update_plot()
 
     def update_main_current(self) -> bool:
@@ -73,7 +73,6 @@ class Coordinator:
         except BaseException as e:
             print(e)
             return False
-        self._update_current_limits()
         self.checkbox_update()
         return True
 
@@ -90,39 +89,29 @@ class Coordinator:
     def _use_trim_coils(self) -> List[int]:
         return [n for n,v in self._coil_settings_calculated.use_trim_coils().items() if v]
 
-    def _update_current_limits(self):
-        trim_coils = self.calculated_field_profile.trim_coils
-        if trim_coils is None:
-            info('Attempted to update trim coil max currents but no trim coils')
-            return
-        for trim_coil in trim_coils:
-            trim_coil.set_current_limits(self._coil_limits[trim_coil.number - 1])
-            coil_settings = self._coil_settings_calculated.coil_settings[trim_coil.number - 1]
-            if coil_settings.max_current is not None:
-                coil_settings.max_current.set(f'{trim_coil.current_limits[1]:.0f}')
-            if coil_settings.min_current is not None:
-                coil_settings.min_current.set(f'{trim_coil.current_limits[0]:.0f}')
-
-
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
-        if trim_coils is not None:
-            for setting in self._coil_settings_calculated.coil_settings.values():
-                setting.setting.set('0')
-            use_coils_indexes = self._use_trim_coils()
-            if use_coils_indexes:
-                # increment coil index by 1 because solve coil currents expects number not index
-                solved_currents = solve_coil_currents(self.field_profile.trim_coil_profile(),
-                                                    trim_coils,
-                                                    use_coils=[v + 1 for v in use_coils_indexes])
-                if solved_currents is not None:
-                    self._plot.strWarning.set('')
+        if trim_coils is None:
+            return
+        for trim_coil in trim_coils:
+            trim_coil.set_current_limits(self._coil_limits[trim_coil.number - 1]) 
+        for setting in self._coil_settings_calculated.coil_settings.values():
+            setting.setting.set('0')
+        use_coils_indexes = self._use_trim_coils()
 
-                    for trim_coil, current in solved_currents.items():
-                        idx = trim_coil.number - 1
-                        self._coil_settings_calculated.coil_settings[idx].setting.set(f'{current:.0f}')
-                else:
-                    self._plot.strWarning.set('Fit failed, try to add more trim coils.')
+        if use_coils_indexes:
+            # increment coil index by 1 because solve coil currents expects number not index
+            solved_currents = solve_coil_currents(self.field_profile.trim_coil_profile(),
+                                                trim_coils,
+                                                use_coils=[v + 1 for v in use_coils_indexes])
+            if solved_currents is not None:
+                self._plot.strWarning.set('')
+
+                for trim_coil, current in solved_currents.items():
+                    idx = trim_coil.number - 1
+                    self._coil_settings_calculated.coil_settings[idx].setting.set(f'{current:.0f}')
+            else:
+                self._plot.strWarning.set('Fit failed, try to add more trim coils.')
 
     def _update_field(self):
         self._update_field_profile(self.field_profile, self._coil_settings)

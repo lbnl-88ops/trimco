@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pydoc import text
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 
 import ttkbootstrap as ttk
 
@@ -61,6 +61,13 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
     def use_trim_coils(self) -> Dict[int, float]:
         return {n: c.use_trim_coil.get() for n, c in self.coil_settings.items() 
                 if c.use_trim_coil is not None}
+
+    def set_current_limits(self, to_set: Dict[int, Tuple[float | None, float]]):
+        for i, setting in self.coil_settings.items():
+            min, max = to_set[i]
+            setting.max_current.set(f'{max:.0f}')
+            if min is not None and setting.min_current is not None:
+                setting.min_current.set(f'{min:.0f}')
 
     @property
     def max_currents(self) -> Dict[int, float]:
