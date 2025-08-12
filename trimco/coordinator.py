@@ -110,10 +110,10 @@ class Coordinator:
                 unbalance = self._coil_settings.unbalance
                 self._plot.clear_warning()
                 currents_to_set = {(c.number - 1): current for c, current in solved_currents.items()}
-                if currents_to_set[0] - unbalance < 0:
+                if abs(currents_to_set[0]) - unbalance < 0:
                     self._plot.set_warning('Bad imbalance value')
                     return
-                currents_to_set[0] = currents_to_set[0] + unbalance/2
+                currents_to_set[0] = currents_to_set[0] + np.sign(currents_to_set[0])*unbalance/2
                 self._coil_settings_calculated.set_current_settings(currents_to_set, unbalance)
             else:
                 self._plot.set_warning('Fit failed, try changing trim coil settings')
@@ -126,7 +126,7 @@ class Coordinator:
 
     def _update_field_profile(self, profile: FieldProfile, coil_settings: CoilSettingsFrame):
         coil_entries = {i: coil_settings.current(i) for i in range(17)}
-        coil_entries[0] = coil_entries[0] - coil_settings.unbalance/2
+        coil_entries[0] = coil_entries[0] - np.sign(coil_entries[0])*coil_settings.unbalance/2
         main_current = float(self._coil_settings.main_current.get())
         profile.update_profile(main_current, coil_entries)
 
