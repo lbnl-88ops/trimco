@@ -48,12 +48,25 @@ class CoilSettingsFrame(ttk.Frame):
                                    state='normal' if not is_calculated else 'disable')
             coil_entry.pack(side='right', padx=self.entry_padding)
             self.coil_settings[i] = CoilSettings(coil_entry, coil_setting)
+        
+        unbalance_frame = ttk.Frame(self, padding=5)
+        unbalance_frame.grid(column=0, row = 6, padx=self.frame_padding, sticky='W', columnspan=int(17/4))
+        self.unbalance_setting = ttk.StringVar(value='0')
+        ttk.Label(unbalance_frame, text='Coil 1 unbalance').pack(side='left', padx=self.entry_padding)
+        self.entUnbalance = ttk.Entry(unbalance_frame, textvariable=self.unbalance_setting, 
+                               width=self.entry_width, 
+                               state='normal' if not is_calculated else 'disable')
+        self.entUnbalance.pack(side='right', padx=self.entry_padding)
 
     def current(self, i: int) -> float:
         return self.currents()[i]
 
     def currents(self) -> Dict[int, float]:
         return {n: float(s.entry.get()) for n, s in self.coil_settings.items()}
+
+    @property
+    def unbalance(self) -> float:
+        return float(self.unbalance_setting.get())
 
 
 class CoilSettingsCalculatedFrame(CoilSettingsFrame):
@@ -75,7 +88,8 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
         for coil_setting in self.coil_settings.values():
             coil_setting.setting.set('0')
 
-    def set_current_settings(self, to_set: Dict[int, float]) -> None:
+    def set_current_settings(self, to_set: Dict[int, float], unbalance: float = 0) -> None:
+        self.unbalance_setting.set(f'{np.round(unbalance, decimals=0):.0f}')
         for i, current in to_set.items():
             self.coil_settings[i].setting.set(f'{np.round(current, decimals=0):.0f}')
 

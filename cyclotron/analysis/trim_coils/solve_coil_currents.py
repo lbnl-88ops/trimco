@@ -49,13 +49,12 @@ def solve_coil_currents(
                   11,12,13,14,15,16,17,18,19,20,21,22,
                   23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39] + 15*[0])[:k]
         return float(np.sqrt(np.sum(weights * r)))
-    
     positive_result = minimize(residual, np.zeros((len(sorted_coils))), bounds=positive_bounds)
     # Set to positive result unless a comparison is required,
     # to avoid extra if/then trees and simplify remaining code
     negative_result = positive_result
     if comparison_required: 
-        x = np.zeros_like((len(sorted_coils)))
+        x = np.zeros((len(sorted_coils)))
         if positive_result['success']:
             x = positive_result['x']
         negative_result = minimize(residual, x, bounds=negative_bounds) 

@@ -37,6 +37,7 @@ class Coordinator:
     def configure_objects(self):
         for entry in [s.entry for s in self._coil_settings.coil_settings.values()]:
             entry.config(validate='focusout', validatecommand=self.entry_update)
+        self._coil_settings.entUnbalance.config(validate='focusout', validatecommand=self.entry_update)
         for coil_setting in self._coil_settings_calculated.coil_settings.values():
             coil_setting.checkbox.config(command=self.checkbox_update)
             for entry in coil_setting.current_entries:
@@ -106,9 +107,14 @@ class Coordinator:
                                                 trim_coils,
                                                 use_coils=[v + 1 for v in use_coils_indexes])
             if solved_currents is not None:
+                unbalance = self._coil_settings.unbalance
                 self._plot.clear_warning()
-                self._coil_settings_calculated.set_current_settings(
-                    {(c.number - 1): current for c, current in solved_currents.items()})
+                currents_to_set = {(c.number - 1): current for c, current in solved_currents.items()}
+                if currents_to_set[0] - unbalance < 0:
+                    self._plot.set_warning('Bad imbalance value')
+                    return
+                currents_to_set[0] = currents_to_set[0] + unbalance/2
+                self._coil_settings_calculated.set_current_settings(currents_to_set, unbalance)
             else:
                 self._plot.set_warning('Fit failed, try changing trim coil settings')
 
@@ -120,6 +126,7 @@ class Coordinator:
 
     def _update_field_profile(self, profile: FieldProfile, coil_settings: CoilSettingsFrame):
         coil_entries = {i: coil_settings.current(i) for i in range(17)}
+        coil_entries[0] = coil_entries[0] - coil_settings.unbalance/2
         main_current = float(self._coil_settings.main_current.get())
         profile.update_profile(main_current, coil_entries)
 
