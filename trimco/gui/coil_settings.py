@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pydoc import text
 from typing import Dict, Optional, List
 
@@ -10,6 +10,7 @@ class CoilSettings:
     setting: ttk.StringVar
     use_trim_coil: Optional[ttk.BooleanVar] = None
     checkbox: Optional[ttk.Checkbutton] = None
+    current_entries: List[ttk.Entry] = field(default_factory=list)
     min_current: Optional[ttk.StringVar] = None
     max_current: Optional[ttk.StringVar] = None
 
@@ -71,11 +72,15 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
             # Packing and repacking
             coil_setting.entry.pack_forget()
             coil_setting.checkbox.pack(side='left', padx=self.entry_padding)
-            ttk.Entry(coil_frame, textvariable=coil_setting.max_current, width=5).pack(side='right')
+            max_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.max_current, width=5)
+            max_current_entry.pack(side='right')
             ttk.Label(coil_frame, text='Max', width=4).pack(side='right', padx=self.entry_padding)
+            coil_setting.current_entries.append(max_current_entry)
             if i == 0:
                 coil_setting.min_current = ttk.StringVar()
-                ttk.Entry(coil_frame, textvariable=coil_setting.min_current, width=5).pack(side='right')
+                min_current_entry = ttk.Entry(coil_frame, textvariable=coil_setting.min_current, width=5)
+                min_current_entry.pack(side='right')
+                coil_setting.current_entries.append(min_current_entry)
                 ttk.Label(coil_frame, text='Min', width=4).pack(side='right', padx=self.entry_padding)
             coil_setting.entry.pack(side='right')
 

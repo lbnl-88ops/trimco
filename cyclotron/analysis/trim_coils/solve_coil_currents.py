@@ -21,7 +21,10 @@ def solve_coil_currents(
 
     solved_currents: Dict[TrimCoil, float] = {}
     k = len(field)
-    bounds = []
+    # Bounds for coils with minimum values
+    comparison_required: bool = False
+    positive_bounds = []
+    negative_bounds = []
     constraints = []
 
     sorted_coils = [coil for coil in sorted(trim_coils, key=lambda x: x.number)
@@ -32,12 +35,13 @@ def solve_coil_currents(
     for i, coil in enumerate(sorted_coils):
         min_current, max_current = coil.current_limits
         if min_current is None:
-            min_current = -max_current
+            positive_bounds.append((-max_current, max_current))
+            negative_bounds.append((-max_current, max_current))
         else:
-            constraints.append({'type': 'ineq', 'fun': lambda x, i=i, min_current=min_current: abs(x[i]) - min_current})
-            min_current = -max_current
+            positive_bounds.append((min_current, max_current))
+            negative_bounds.append((-max_current, -min_current))
+            comparison_required = True
 
-        bounds.append((min_current, max_current))
         A[i, :] = coil.db_di()[:k]
 
     def residual(x) -> float: 
@@ -46,11 +50,19 @@ def solve_coil_currents(
                   11,12,13,14,15,16,17,18,19,20,21,22,
                   23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39] + 15*[0])[:k]
         return float(np.sqrt(np.sum(weights * r)))
-    result = minimize(residual, np.zeros((len(sorted_coils))), bounds=bounds, 
-                    constraints=constraints)    
-    if not result['success']:
+    
+    positive_result = minimize(residual, np.zeros((len(sorted_coils))), bounds=positive_bounds)
+    # Set to positive result unless a comparison is required,
+    # to avoid extra if/then trees and simplify remaining code
+    negative_result = positive_result
+    if comparison_required: 
+        negative_result = minimize(residual, np.zeros((len(sorted_coils))), bounds=negative_bounds) 
+
+    if not positive_result['success'] and negative_result['success']:
         _log.warning('Trim coil fit failed')
         return None
+
+    result = positive_result if positive_result['fun'] < negative_result['fun'] else negative_result    
     x = result['x']
     for i, current in enumerate(x):
         coil = sorted_coils[i]

@@ -34,9 +34,10 @@ class Coordinator:
     def configure_objects(self):
         for entry in [s.entry for s in self._coil_settings.coil_settings.values()]:
             entry.config(validate='focusout', validatecommand=self.entry_update)
-        for checkbox in [s.checkbox for s in self._coil_settings_calculated.coil_settings.values()
-                         if s.checkbox is not None]:
-            checkbox.config(command=self.checkbox_update)
+        for coil_setting in self._coil_settings_calculated.coil_settings.values():
+            coil_setting.checkbox.config(command=self.checkbox_update)
+            for entry in coil_setting.current_entries:
+                entry.config(validate='focusout', validatecommand=self.current_limit_update)
         self._coil_settings.entMainCurrent.config(validate='focusout', 
                                                   validatecommand=self.update_main_current)
         self._update_field() 
@@ -48,7 +49,8 @@ class Coordinator:
         try:
             self.entry_update()
             self.checkbox_update()
-        except BaseException:
+        except BaseException as e:
+            print(e)
             return False
         return True
 
@@ -58,17 +60,33 @@ class Coordinator:
             self.update_plot()
             if self._use_trim_coils():
                 self.checkbox_update()
-        except BaseException:
+        except BaseException as e:
+            print(e)
             return False
+        return True
+    
+    def current_limit_update(self) -> bool:
+        try:
+            for i, setting in self._coil_settings_calculated.coil_settings.items():
+                if setting.min_current is None:
+                    min_current = None
+                else:
+                    min_current = float(setting.min_current.get())
+                self._coil_limits.set_limits(i, min_current, float(setting.max_current.get()))
+        except BaseException as e:
+            print(e)
+            return False
+        self._update_current_limits()
+        self.checkbox_update()
         return True
 
     def checkbox_update(self) -> bool:
         try:
-            self._update_current_limits()
             self._calculate_new_settings()
             self._update_calculated_field()
             self.update_plot()
-        except BaseException:
+        except BaseException as e:
+            print(e)
             return False
         return True
 
