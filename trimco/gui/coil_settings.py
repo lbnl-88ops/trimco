@@ -62,6 +62,19 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
         return {n: c.use_trim_coil.get() for n, c in self.coil_settings.items() 
                 if c.use_trim_coil is not None}
 
+    @property
+    def max_currents(self) -> Dict[int, float]:
+        return {n: float(c.max_current.get()) for n, c in self.coil_settings.items()
+                if c.max_current is not None}
+
+    @property
+    def min_currents(self) -> Dict[int, float | None]:
+        return {n: None if c.min_current is None else float(c.min_current.get()) 
+                for n, c in self.coil_settings.items()}
+
+    def current_limits(self):
+        return {n: (self.min_currents[n], self.max_currents[n]) for n in range(17)}
+
     def create_widgets(self, is_calculated):
         super().create_widgets(is_calculated)
         for i, coil_frame in enumerate(self.coil_frames):

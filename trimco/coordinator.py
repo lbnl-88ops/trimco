@@ -1,4 +1,4 @@
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Tuple
 from logging import info
 from pathlib import Path
 
@@ -6,8 +6,8 @@ from trimco.gui.plot import PlotFrame
 from trimco.gui.coil_settings import CoilSettingsCalculatedFrame, CoilSettingsFrame
 
 from trimco.calc.field_profile import FieldProfile
-from trimco.calc.coil_limits import CoilLimits
-from cyclotron.analysis.trim_coils import solve_coil_currents, update_current_limits
+from cyclotron.analysis.trim_coils import solve_coil_currents
+from cyclotron.analysis.trim_coils.current_limits import _get_default_limits
 
 import numpy as np
 
@@ -16,7 +16,9 @@ class Coordinator:
         self.attach(objects)
         self.field_profile = FieldProfile()
         self.calculated_field_profile = FieldProfile()
-        self._coil_limits = CoilLimits()
+        self._coil_limits: Dict[int, Tuple[float | None, float]] = {
+            n: _get_default_limits(n + 1) for n in range(17)
+        }
         self.configure_objects()
 
     def attach(self, objects: List[Any]) -> None:
@@ -67,12 +69,7 @@ class Coordinator:
     
     def current_limit_update(self) -> bool:
         try:
-            for i, setting in self._coil_settings_calculated.coil_settings.items():
-                if setting.min_current is None:
-                    min_current = None
-                else:
-                    min_current = float(setting.min_current.get())
-                self._coil_limits.set_limits(i, min_current, float(setting.max_current.get()))
+            self._coil_limits = self._coil_settings_calculated.current_limits()
         except BaseException as e:
             print(e)
             return False
@@ -99,7 +96,7 @@ class Coordinator:
             info('Attempted to update trim coil max currents but no trim coils')
             return
         for trim_coil in trim_coils:
-            trim_coil.set_current_limits(self._coil_limits.current_limits[trim_coil.number - 1])
+            trim_coil.set_current_limits(self._coil_limits[trim_coil.number - 1])
             coil_settings = self._coil_settings_calculated.coil_settings[trim_coil.number - 1]
             if coil_settings.max_current is not None:
                 coil_settings.max_current.set(f'{trim_coil.current_limits[1]:.0f}')
