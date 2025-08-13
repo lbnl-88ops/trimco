@@ -15,9 +15,11 @@ class TrimcoApp(ttk.Window):
         self.coil_settings = CoilSettingsFrame(self)
         self.plot = PlotFrame(self)
         self.coil_settings_calculated = CoilSettingsCalculatedFrame(self)
+        ttk.Label(self, text='Current coil settings').pack(side='top')
         self.coil_settings.pack(side='top')
         self.plot.pack(side='top')
 
+        ttk.Label(self, text='Calculated coil settings').pack(side='top')
         self.coil_settings_calculated.pack(side='top')
         self.coordinator = Coordinator([self.plot, self.coil_settings,
                                         self.coil_settings_calculated])

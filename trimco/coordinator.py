@@ -1,6 +1,7 @@
 from typing import Any, List, Dict, Tuple
 from logging import info
 from pathlib import Path
+import traceback
 
 from trimco.gui.plot import PlotFrame
 from trimco.gui.coil_settings import CoilSettingsCalculatedFrame, CoilSettingsFrame
@@ -54,7 +55,7 @@ class Coordinator:
             self.entry_update()
             self.checkbox_update()
         except BaseException as e:
-            print(e)
+            print(f'Error updating main current: {traceback.print_exc()}')
             return False
         return True
 
@@ -65,7 +66,7 @@ class Coordinator:
             if self._use_trim_coils():
                 self.checkbox_update()
         except BaseException as e:
-            print(e)
+            print(f'Error updating coil current: {traceback.print_exc()}')
             return False
         return True
     
@@ -73,7 +74,7 @@ class Coordinator:
         try:
             self._coil_limits = self._coil_settings_calculated.current_limits()
         except BaseException as e:
-            print(e)
+            print(f'Error updating coil current limit: {traceback.print_exc()}')
             return False
         self.checkbox_update()
         return True
@@ -84,7 +85,7 @@ class Coordinator:
             self._update_calculated_field()
             self.update_plot()
         except BaseException as e:
-            print(e)
+            print(f'Error updating coil status: {traceback.print_exc()}')
             return False
         return True
 
@@ -96,7 +97,13 @@ class Coordinator:
         if trim_coils is None:
             return
         for trim_coil in trim_coils:
-            trim_coil.set_current_limits(self._coil_limits[trim_coil.number - 1]) 
+            idx = trim_coil.number - 1
+            if trim_coil.number == 1:
+                limits = (self._coil_limits[idx][0], 
+                          self._coil_limits[idx][1] - self._coil_settings.unbalance/2)
+            else:
+                limits = self._coil_limits[idx]
+            trim_coil.set_current_limits(limits) 
 
         use_coils_indexes = self._use_trim_coils()
         self._coil_settings_calculated.clear_current_settings()
@@ -110,10 +117,11 @@ class Coordinator:
                 unbalance = self._coil_settings.unbalance
                 self._plot.clear_warning()
                 currents_to_set = {(c.number - 1): current for c, current in solved_currents.items()}
-                if abs(currents_to_set[0]) - unbalance < 0:
-                    self._plot.set_warning('Bad imbalance value')
-                    return
-                currents_to_set[0] = currents_to_set[0] + np.sign(currents_to_set[0])*unbalance/2
+                if 0 in currents_to_set:
+                    if abs(currents_to_set[0]) - unbalance < 0:
+                        self._plot.set_warning('Bad imbalance value')
+                        return
+                    currents_to_set[0] = currents_to_set[0] + np.sign(currents_to_set[0])*unbalance/2
                 self._coil_settings_calculated.set_current_settings(currents_to_set, unbalance)
             else:
                 self._plot.set_warning('Fit failed, try changing trim coil settings')

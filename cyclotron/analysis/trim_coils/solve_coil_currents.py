@@ -62,8 +62,13 @@ def solve_coil_currents(
     if not positive_result['success'] and negative_result['success']:
         _log.warning('Trim coil fit failed')
         return None
+    elif not positive_result['success']:
+        result = negative_result
+    elif not negative_result['success']:
+        result = positive_result
+    else:
+        result = positive_result if positive_result['fun'] < negative_result['fun'] else negative_result    
 
-    result = positive_result if positive_result['fun'] < negative_result['fun'] else negative_result    
     x = result['x']
     for i, current in enumerate(x):
         coil = sorted_coils[i]
