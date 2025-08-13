@@ -22,7 +22,7 @@ jobs:
           pip install pipenv pyinstaller
           pipenv install --system
       - name: Build executable
-        run: pyinstaller --noconsole --onefile --icon=trimco.ico trimco.py
+        run: pyinstaller --noconsole --onefile --icon=trimco.ico --add-data ./data/fieldmap.txt:./data --add-data ./data/TAPEIN.TXT:./data trimco.py
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
