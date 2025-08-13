@@ -46,6 +46,7 @@ class Coordinator:
         self._coil_settings.entMainCurrent.config(validate='focusout', 
                                                   validatecommand=self.update_main_current)
         self._coil_settings_calculated.set_current_limits(self._coil_limits)
+        self._coil_settings_calculated.entUnbalanceDesired.config(validate='focusout', validatecommand=self.entry_update)
         self._update_field() 
         self._update_calculated_field()
         self.update_plot()
@@ -94,13 +95,14 @@ class Coordinator:
 
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
+        desired_unbalance = float(self._coil_settings_calculated.unbalance_desired.get())
         if trim_coils is None:
             return
         for trim_coil in trim_coils:
             idx = trim_coil.number - 1
             if trim_coil.number == 1:
                 limits = (self._coil_limits[idx][0], 
-                          self._coil_limits[idx][1] - self._coil_settings.unbalance/2)
+                          self._coil_limits[idx][1] - desired_unbalance/2)
             else:
                 limits = self._coil_limits[idx]
             trim_coil.set_current_limits(limits) 
@@ -114,15 +116,15 @@ class Coordinator:
                                                 trim_coils,
                                                 use_coils=[v + 1 for v in use_coils_indexes])
             if solved_currents is not None:
-                unbalance = self._coil_settings.unbalance
+                # unbalance = self._coil_settings.unbalance
                 self._plot.clear_warning()
                 currents_to_set = {(c.number - 1): current for c, current in solved_currents.items()}
                 if 0 in currents_to_set:
-                    if abs(currents_to_set[0]) - unbalance < 0:
+                    if abs(currents_to_set[0]) - desired_unbalance < 0:
                         self._plot.set_warning('Bad imbalance value')
                         return
-                    currents_to_set[0] = currents_to_set[0] + np.sign(currents_to_set[0])*unbalance/2
-                self._coil_settings_calculated.set_current_settings(currents_to_set, unbalance)
+                    currents_to_set[0] = currents_to_set[0] + np.sign(currents_to_set[0])*desired_unbalance/2
+                self._coil_settings_calculated.set_current_settings(currents_to_set, desired_unbalance)
             else:
                 self._plot.set_warning('Fit failed, try changing trim coil settings')
 

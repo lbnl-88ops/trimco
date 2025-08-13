@@ -24,7 +24,7 @@ class CoilSettingsFrame(ttk.Frame):
         self.frame_padding = 5
         self.entry_padding = 5
         self.entry_width = 7
-        self.label_width = 2
+        self.label_width = 7
         self.create_widgets(is_calculated)
         
     def create_widgets(self, is_calculated):
@@ -43,17 +43,18 @@ class CoilSettingsFrame(ttk.Frame):
             coil_frame.grid(column=int(i/4), row=int(i % 4) + 1, padx=self.frame_padding, sticky='W')
 
             coil_setting = ttk.StringVar(value = '0')
-            ttk.Label(coil_frame, text=f'{i+1}', width=self.label_width).pack(side='left', padx=self.entry_padding)
+            ttk.Label(coil_frame, text=f'{i+1}', width=self.label_width, anchor='e').pack(side='left', padx=self.entry_padding)
             coil_entry = ttk.Entry(coil_frame, textvariable=coil_setting, width=self.entry_width,
                                    state='normal' if not is_calculated else 'disable')
             coil_entry.pack(side='right', padx=self.entry_padding)
             self.coil_settings[i] = CoilSettings(coil_entry, coil_setting)
         
-        unbalance_frame = ttk.Frame(self, padding=5)
-        unbalance_frame.grid(column=0, row = 6, padx=self.frame_padding, sticky='W', columnspan=int(17/4))
+        self.unbalance_frame = ttk.Frame(self)
+        col, _, = self.grid_size()
+        self.unbalance_frame.grid(column=col - 1, row =2, padx=self.frame_padding, sticky='W')#, columnspan=int(17/4))
         self.unbalance_setting = ttk.StringVar(value='0')
-        ttk.Label(unbalance_frame, text='1 unbalance').pack(side='left', padx=self.entry_padding)
-        self.entUnbalance = ttk.Entry(unbalance_frame, textvariable=self.unbalance_setting, 
+        ttk.Label(self.unbalance_frame, text='TC1 Unb', anchor='e', width=self.label_width).pack(side='left', padx=self.entry_padding)
+        self.entUnbalance = ttk.Entry(self.unbalance_frame, textvariable=self.unbalance_setting, 
                                width=self.entry_width, 
                                state='normal' if not is_calculated else 'disable')
         self.entUnbalance.pack(side='right', padx=self.entry_padding)
@@ -127,4 +128,12 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
                 coil_setting.current_entries.append(min_current_entry)
                 ttk.Label(coil_frame, text='Min', width=4).pack(side='right', padx=self.entry_padding)
             coil_setting.entry.pack(side='right')
+
+        self.entUnbalance.pack_forget()
+        self.unbalance_desired = ttk.StringVar(value='0')
+        self.entUnbalanceDesired = ttk.Entry(self.unbalance_frame, width=self.entry_width, textvariable=self.unbalance_desired)
+        self.entUnbalanceDesired.pack(side='right')
+        ttk.Label(self.unbalance_frame, text='Desired').pack(side='right')
+        self.entUnbalance.pack(side='right')
+
 
