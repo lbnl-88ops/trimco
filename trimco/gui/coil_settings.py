@@ -107,6 +107,10 @@ class CoilSettingsCalculatedFrame(CoilSettingsFrame):
     def current_limits(self):
         return {n: (self.min_currents[n], self.max_currents[n]) for n in range(17)}
 
+    @property
+    def unbalance(self) -> float:
+        return float(self.unbalance_desired.get())
+
     def create_widgets(self, is_calculated):
         super().create_widgets(is_calculated)
         for i, coil_frame in enumerate(self.coil_frames):

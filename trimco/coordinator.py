@@ -95,13 +95,14 @@ class Coordinator:
 
     def _calculate_new_settings(self):
         trim_coils = self.calculated_field_profile.trim_coils
-        desired_unbalance = float(self._coil_settings_calculated.unbalance_desired.get())
+        desired_unbalance = self._coil_settings_calculated.unbalance
         if trim_coils is None:
             return
         for trim_coil in trim_coils:
             idx = trim_coil.number - 1
             if trim_coil.number == 1:
-                limits = (self._coil_limits[idx][0], 
+                min = desired_unbalance
+                limits = (min if min > 0 else None,
                           self._coil_limits[idx][1] - desired_unbalance/2)
             else:
                 limits = self._coil_limits[idx]
