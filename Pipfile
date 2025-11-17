@@ -7,9 +7,9 @@ name = "pypi"
 ttkbootstrap = "*"
 matplotlib = "*"
 scipy = "*"
-"ops.cyclotron.analysis" = {editable = true, git = "https://github.com/lbnl-88ops/cyclotron.analysis.git"}
 
 [dev-packages]
+"ops.cyclotron.analysis" = {editable = true, git = "https://github.com/lbnl-88ops/cyclotron.analysis.git"}
 
 [requires]
 python_version = "3.13"
