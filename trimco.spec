@@ -6,7 +6,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-    	('./data/fieldmap.txt', './data')
+    	('./data/fieldmap.txt', './data'),
     	('./data/TAPEIN.TXT', './data')
     ],
     hiddenimports=[],
