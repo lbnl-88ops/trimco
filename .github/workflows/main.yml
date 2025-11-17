@@ -22,10 +22,18 @@ jobs:
           repository: lbnl-88ops/cyclotron.analysis
           path: cyclotron.analysis
 
-      - name: Set up python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
@@ -35,14 +43,22 @@ jobs:
           pipenv install --system --dev
         shell: bash
 
-      - name: Build executable
+      - name: Build executable with PyInstaller
         run: |
-          pyinstaller --noconsole --onefile --icon=trimco.ico trimco.py
-        working-directory: main_app 
+          pyinstaller trimco.spec --clean
+        working-directory: main_app
+
+      - name: Prepare artifact for release
+        run: |
+          $TAG_NAME = "${{ github.ref_name }}" -replace "v", ""
+          $ARTIFACT_FOLDER_NAME = "trimco-${TAG_NAME}-win64"
+          Move-Item -Path ./main_app/dist/trimco -Destination ./main_app/dist/$ARTIFACT_FOLDER_NAME
+          Compress-Archive -Path ./main_app/dist/$ARTIFACT_FOLDER_NAME -DestinationPath ./main_app/dist/$ARTIFACT_FOLDER_NAME.zip
+        shell: pwsh
 
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./main_app/dist/trimco.exe
-          prerelease: ${{ github.ref_name != 'main' }}
+          files: ./main_app/dist/*.zip
+          prerelease: ${{ github.ref_name == 'main' && 'false' || 'true' }}

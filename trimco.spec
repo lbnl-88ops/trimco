@@ -5,7 +5,10 @@ a = Analysis(
     ['trimco.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+    	('./data/fieldmap.txt', './data')
+    	('./data/TAPEIN.TXT', './data')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
